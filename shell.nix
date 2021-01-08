@@ -1,23 +1,8 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> { }, ghc ? pkgs.ghc }:
+with pkgs;
 
-let
-    inherit (nixpkgs) pkgs;
-    inherit (pkgs) haskellPackages;
-
-    haskellDeps = ps: with ps; [ base ];
-
-    project = import ./release.nix;
-
-    ghc = haskellPackages.ghcWithPackages haskellDeps;
-
-    nixPackages = [
-        ghc
-        haskellPackages.cabal-install
-        pkgs.gdb
-        pkgs.nixfmt
-    ];
-in
-    pkgs.stdenv.mkDerivation {
-        name = "haskell-nix-test";
-        buildInputs = project.env.nativeBuildInputs ++ nixPackages;
-    }
+haskell.lib.buildStackProject {
+  inherit ghc;
+  name = "haskell-nix-test";
+  buildInputs = [ nixfmt ];
+}
